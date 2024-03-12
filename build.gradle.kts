@@ -15,7 +15,7 @@ plugins {
 }
 
 group = "at.hannibal2.skyhanni"
-version = "SkyHanni-0.24.beta.9-overflow"
+version = "0.24.Beta.11"
 
 val gitHash by lazy {
     val baos = ByteArrayOutputStream()
@@ -283,6 +283,3 @@ publishing.publications {
         }
     }
 }
-
-
-

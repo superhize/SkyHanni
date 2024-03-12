@@ -12,6 +12,8 @@
 //  - shorten time till next mayor https://discord.com/channels/997079228510117908/1162844830360146080/1216440046320746596
 //  - option to hide coins earned
 //  - color options in the purse etc lines
+//  - choose the amount of decimal places in shorten nums
+//  - very important bug fix: duplex is weird :(
 //
 
 package at.hannibal2.skyhanni.features.gui.customscoreboard
@@ -32,7 +34,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 typealias ScoreboardElementType = Pair<String, HorizontalAlignment>
 
 class CustomScoreboard {
-    private val config get() = SkyHanniMod.feature.gui.customScoreboard
+
     private var display = emptyList<ScoreboardElementType>()
     private var cache = emptyList<ScoreboardElementType>()
     private val guiName = "Custom Scoreboard"
@@ -44,13 +46,13 @@ class CustomScoreboard {
 
         RenderBackground().renderBackground()
 
-        if (!TabListData.fullyLoaded && config.displayConfig.cacheScoreboardOnIslandSwitch && cache.isNotEmpty()) {
-            config.position.renderStringsAlignedWidth(cache, posLabel = guiName)
-        } else {
-            config.position.renderStringsAlignedWidth(display, posLabel = guiName)
-
-            if (cache != display) cache = display
-        }
+        val render =
+            if (!TabListData.fullyLoaded && config.displayConfig.cacheScoreboardOnIslandSwitch && cache.isNotEmpty()) {
+                cache
+            } else {
+                display
+            }
+        config.position.renderStringsAlignedWidth(render, posLabel = guiName)
     }
 
     @SubscribeEvent
@@ -72,48 +74,46 @@ class CustomScoreboard {
         // Creating the lines
         if (event.isMod(5)) {
             display = createLines()
+            if (TabListData.fullyLoaded) {
+                cache = display.toList()
+            }
         }
 
         // Remove Known Lines, so we can get the unknown ones
         UnknownLinesHandler.handleUnknownLines()
     }
 
-    private fun createLines() = buildList<ScoreboardElementType> {
-        val lineMap = ScoreboardElement.entries.associate {
-            it.ordinal to
-                if (it.isVisible()) it.getPair() else listOf("<hidden>" to HorizontalAlignment.LEFT)
-        }
-
-        return formatLines(lineMap)
+    companion object {
+        internal val config get() = SkyHanniMod.feature.gui.customScoreboard
+        internal val displayConfig get() = config.displayConfig
+        internal val informationFilteringConfig get() = config.informationFilteringConfig
+        internal val backgroundConfig get() = config.backgroundConfig
     }
 
-    private fun formatLines(lineMap: Map<Int, List<ScoreboardElementType>>): List<ScoreboardElementType> {
-        return buildList {
-            for (element in config.scoreboardEntries) {
-                val line = lineMap[element.ordinal] ?: continue
+    private fun createLines() = buildList<ScoreboardElementType> {
+        for (element in config.scoreboardEntries) {
+            val line = element.getVisiblePair()
 
-                // Hide consecutive empty lines
-                if (
-                    config.informationFilteringConfig.hideConsecutiveEmptyLines &&
-                    line.isNotEmpty() && line[0].first == "<empty>" && lastOrNull()?.first?.isEmpty() == true
-                ) {
-                    continue
-                }
-
-                // Adds empty lines
-                if (line[0].first == "<empty>") {
-                    add("" to HorizontalAlignment.LEFT)
-                    continue
-                }
-
-                // Does not display this line
-                if (line.any { it.first == "<hidden>" }) {
-                    continue
-                }
-
-                // Multiline and singular line support
-                addAll(line)
+            // Hide consecutive empty lines
+            if (
+                config.informationFilteringConfig.hideConsecutiveEmptyLines &&
+                line.isNotEmpty() && line[0].first == "<empty>" && lastOrNull()?.first?.isEmpty() == true
+            ) {
+                continue
             }
+
+            // Adds empty lines
+            if (line[0].first == "<empty>") {
+                add("" to HorizontalAlignment.LEFT)
+                continue
+            }
+
+            // Does not display this line
+            if (line.any { it.first == "<hidden>" }) {
+                continue
+            }
+
+            addAll(line)
         }
     }
 
