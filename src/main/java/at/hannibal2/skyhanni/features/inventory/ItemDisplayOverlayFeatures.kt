@@ -167,8 +167,11 @@ object ItemDisplayOverlayFeatures {
                 val level = "" + text.romanToDecimalIfNecessary()
                 val skill = SkillType.getByNameOrNull(skillName) ?: return level
                 val skillInfo = SkillAPI.storage?.get(skill) ?: return level
-                return if (overflowConfig.enableInSkillMenuAsStackSize)
-                    "" + skillInfo.overflowLevel else level
+                return if (!overflowConfig.enableInSkillMenuAsStackSize && overflowConfig.enableInSkillMenuTooltip)
+                    "§a" + skillInfo.level
+                else if (overflowConfig.enableInSkillMenuAsStackSize)
+                    "§b" + skillInfo.overflowLevel
+                else "§c$level"
             }
         }
 
@@ -213,9 +216,9 @@ object ItemDisplayOverlayFeatures {
         if (DUNGEON_POTION_LEVEL.isSelected() && itemName.startsWith("Dungeon ") && itemName.contains(" Potion")) {
             dungeonPotionPattern.matchMatcher(item.name.removeColor()) {
                 return when (val level = group("level").romanToDecimal()) {
-                    in 1..2 -> "§f$level"
-                    in 3..4 -> "§a$level"
-                    in 5..6 -> "§9$level"
+                    in 1 .. 2 -> "§f$level"
+                    in 3 .. 4 -> "§a$level"
+                    in 5 .. 6 -> "§9$level"
                     else -> "§5$level"
                 }
             }
