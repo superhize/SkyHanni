@@ -4,6 +4,7 @@ import at.hannibal2.skyhanni.SkyHanniMod
 import at.hannibal2.skyhanni.api.SkillAPI
 import at.hannibal2.skyhanni.config.ConfigFileType
 import at.hannibal2.skyhanni.config.ConfigGuiManager
+import at.hannibal2.skyhanni.data.ChatClickActionManager
 import at.hannibal2.skyhanni.data.ChatManager
 import at.hannibal2.skyhanni.data.GardenCropMilestones
 import at.hannibal2.skyhanni.data.GardenCropMilestonesCommunityFix
@@ -44,6 +45,7 @@ import at.hannibal2.skyhanni.features.garden.farming.GardenStartLocation
 import at.hannibal2.skyhanni.features.garden.farming.lane.FarmingLaneCreator
 import at.hannibal2.skyhanni.features.garden.fortuneguide.CaptureFarmingGear
 import at.hannibal2.skyhanni.features.garden.fortuneguide.FFGuideGUI
+import at.hannibal2.skyhanni.features.garden.visitor.GardenVisitorDropStatistics
 import at.hannibal2.skyhanni.features.mining.KingTalismanHelper
 import at.hannibal2.skyhanni.features.mining.powdertracker.PowderTracker
 import at.hannibal2.skyhanni.features.minion.MinionFeatures
@@ -211,6 +213,10 @@ object Commands {
             "shresetfishingtracker",
             "Resets the Fishing Profit Tracker"
         ) { FishingProfitTracker.resetCommand(it) }
+        registerCommand(
+            "shresetvisitordrops",
+            "Reset the Visitors Drop Statistics"
+        ) { GardenVisitorDropStatistics.resetCommand() }
         registerCommand("shbingotoggle", "Toggle the bingo card display mode") { BingoCardDisplay.toggleCommand() }
         registerCommand(
             "shfarmingprofile",
@@ -498,6 +504,7 @@ object Commands {
         registerCommand("shsendcontests", "") { GardenNextJacobContest.shareContestConfirmed(it) }
         registerCommand("shwords", "Opens the config list for modifying visual words") { openVisualWords() }
         registerCommand("shstopaccountupgradereminder", "") { AccountUpgradeReminder.disable() }
+        registerCommand("shaction", "") { ChatClickActionManager.onCommand(it) }
     }
 
     private fun shortenedCommands() {
