@@ -171,6 +171,9 @@ Use `/sh` or `/skyhanni` to open the SkyHanni config in game.
 + AH Show Price Comparison. - hannibal2 (https://github.com/hannibal002/SkyHanni/pull/339)
     + Highlight auctions based on the difference between their estimated value and the value they are listed for.
     + Options to change the colours
++ Highlight options in /tab. - Conutik (https://github.com/hannibal002/SkyHanni/pull/1175)
+    + Green for enabled
+    + Red for disabled
 
 </details>
 <details open><summary>
@@ -542,7 +545,7 @@ Use `/sh` or `/skyhanni` to open the SkyHanni config in game.
   is empty when fully filled and show a preview how these stats change when hovering over an upgrade
 + Hide crop money display, crop milestone display and garden visitor list while inside anita show, SkyMart or the
   composter inventory
-+ Hide chat messages from the visitors in the garden. (Except Beth, Jacob and Spaceman)
++ Hide chat messages from the visitors in the garden. (Except Beth and Spaceman)
 + Show the average crop milestone in the crop milestone inventory.
 + **FF for Contest** - Show the minimum needed Farming Fortune for reaching a medal in the Jacob's Farming Contest
   inventory.
