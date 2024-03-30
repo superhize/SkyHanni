@@ -26,6 +26,7 @@ import at.hannibal2.skyhanni.data.PetAPI
 import at.hannibal2.skyhanni.events.RenderItemTipEvent
 import at.hannibal2.skyhanni.features.garden.GardenAPI
 import at.hannibal2.skyhanni.features.garden.pests.PestAPI
+import at.hannibal2.skyhanni.features.skillprogress.SkillProgress
 import at.hannibal2.skyhanni.features.skillprogress.SkillType
 import at.hannibal2.skyhanni.utils.ConfigUtils
 import at.hannibal2.skyhanni.utils.InventoryUtils
@@ -170,10 +171,11 @@ object ItemDisplayOverlayFeatures {
                 val skill = SkillType.getByNameOrNull(skillName) ?: return level
                 val skillInfo = SkillAPI.storage?.get(skill) ?: return level
                 return if (!overflowConfig.enableInSkillMenuAsStackSize && overflowConfig.enableInSkillMenuTooltip)
-                    "§a" + skillInfo.level
+                    "" + skillInfo.level
                 else if (overflowConfig.enableInSkillMenuAsStackSize)
-                    "§b" + skillInfo.overflowLevel
-                else "§c$level"
+                   "" + skillInfo.overflowLevel
+                else "" + level
+
             }
         }
 
