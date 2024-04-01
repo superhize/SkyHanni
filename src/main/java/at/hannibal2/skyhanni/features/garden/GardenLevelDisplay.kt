@@ -50,7 +50,7 @@ class GardenLevelDisplay {
     )
     private val gardenMaxLevelPattern by patternGroup.pattern(
         "inventory.max",
-        "§7§8Max level reached!"
+        "§5§o§7§8Max level reached!"
     )
     private val visitorRewardPattern by patternGroup.pattern(
         "chat.increase",
@@ -130,9 +130,10 @@ class GardenLevelDisplay {
         if (!config.overflow.get()) return
         val inventoryName = InventoryUtils.openInventoryName()
         val slotIndex = event.slot.slotIndex
+        println("ping")
         if (!((inventoryName == "Desk" && slotIndex == 4) ||
             (inventoryName == "SkyBlock Menu" && slotIndex == 10))) return
-
+        println("pong")
         val gardenExp = GardenAPI.gardenExp ?: return
         val currentLevel = GardenAPI.getGardenLevel()
         if (currentLevel < 15) return
@@ -142,17 +143,21 @@ class GardenLevelDisplay {
         val overflowTotal = (gardenExp - GardenAPI.getExpForLevel(15)).toInt()
         val needForNextLevel = GardenAPI.getExpForLevel(currentLevel + 1).toInt()
         val needForOnlyNextLvl = needForNextLevel - needForLevel
-
+        println("hello")
         val iterator = event.toolTip.listIterator()
         if (slotIndex == 4 && currentLevel > 15) event.itemStack.name = "§aGarden Level ${currentLevel.toRoman()}"
         var next = false
+        println("aaaa")
         for (line in iterator) {
+            println(line)
             if (gardenMaxLevelPattern.matches(line)) {
+                println("no matcho")
                 iterator.set("§7Progress to Level ${(currentLevel+1).toRoman()}")
                 next = true
                 continue
             }
             if (next && line.contains("                    ")) {
+                println("seto")
                 val progress = overflow/needForOnlyNextLvl
                 val progressBar = StringUtils.progressBar(progress, 20)
                 iterator.set("$progressBar §e${overflow.addSeparators()}§6/§e${format(needForOnlyNextLvl)}")
