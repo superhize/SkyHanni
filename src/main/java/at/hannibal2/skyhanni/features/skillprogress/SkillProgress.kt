@@ -459,7 +459,7 @@ object SkillProgress {
         if (config.showLevel.get()) {
             val colorLevel = if (config.skillColorConfig.scalingColorLevel.get()) getColorForLevel(level) else "§d"
             val levelString = if (matchColor) "[$level] " else "§9[$colorLevel$level§9] "
-            add(Renderable.string(levelString, color))
+            add(Renderable.string(levelString, color = color))
         }
 
         if (config.useIcon.get()) {
@@ -513,7 +513,7 @@ object SkillProgress {
                     append("$percentColor∞ Left")
                 }
             }
-        }, color))
+        }, color = color))
     }
 
     private fun updateSkillInfo() {

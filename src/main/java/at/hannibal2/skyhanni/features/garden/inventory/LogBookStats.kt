@@ -1,14 +1,16 @@
 package at.hannibal2.skyhanni.features.garden.inventory
 
 import at.hannibal2.skyhanni.events.GuiRenderEvent
+import at.hannibal2.skyhanni.events.InventoryCloseEvent
 import at.hannibal2.skyhanni.events.InventoryFullyOpenedEvent
 import at.hannibal2.skyhanni.events.ProfileJoinEvent
 import at.hannibal2.skyhanni.features.garden.GardenAPI
 import at.hannibal2.skyhanni.features.garden.visitor.VisitorAPI
 import at.hannibal2.skyhanni.utils.ItemUtils.getLore
 import at.hannibal2.skyhanni.utils.NumberUtil.formatLong
+import at.hannibal2.skyhanni.utils.NumberUtil.addSeparators
 import at.hannibal2.skyhanni.utils.RenderUtils.renderRenderables
-import at.hannibal2.skyhanni.utils.StringUtils.matchMatcher
+import at.hannibal2.skyhanni.utils.StringUtils.matchFirst
 import at.hannibal2.skyhanni.utils.renderables.Renderable
 import at.hannibal2.skyhanni.utils.repopatterns.RepoPattern
 import net.minecraft.init.Items
@@ -49,13 +51,12 @@ class LogBookStats {
             val visitorName = item.displayName ?: continue
             var timesVisited = 0L
             var timesAccepted = 0L
-            for (line in item.getLore()) {
-                visitedPattern.matchMatcher(line) {
-                    timesVisited += group("timesVisited").formatLong()
-                }
-                acceptedPattern.matchMatcher(line) {
-                    timesAccepted += group("timesAccepted").formatLong()
-                }
+            val lore = item.getLore()
+            lore.matchFirst(visitedPattern) {
+                timesVisited += group("timesVisited").formatLong()
+            }
+            lore.matchFirst(acceptedPattern) {
+                timesAccepted += group("timesAccepted").formatLong()
             }
 
             val visitor = VisitorInfo(index, visitorName, timesVisited, timesAccepted)
@@ -63,15 +64,19 @@ class LogBookStats {
         }
         loggedVisitors[currentPage] = list
         display = buildList {
-            add(Renderable.string("§6Times Visited: §b${loggedVisitors.values.sumOf { it.sumOf { visitor -> visitor.timesVisited } }}"))
-            add(Renderable.string("§6Times Accepted: §a${loggedVisitors.values.sumOf { it.sumOf { visitor -> visitor.timesAccepted } }}"))
-            add(Renderable.string("§6Times Denied: §c${loggedVisitors.values.sumOf { it.sumOf { visitor -> (visitor.timesVisited - visitor.timesAccepted) } } - VisitorAPI.getVisitors().size}"))
+            val visited = loggedVisitors.values.sumOf { it.sumOf { visitor -> visitor.timesVisited } }
+            val accepted = loggedVisitors.values.sumOf { it.sumOf { visitor -> visitor.timesAccepted } }
+            val visitingNow = VisitorAPI.getVisitors().size
+            val denied = visited - accepted - visitingNow
+            add(Renderable.string("§6Times Visited: §b${visited.addSeparators()}"))
+            add(Renderable.string("§6Times Accepted: §a${accepted.addSeparators()}"))
+            add(Renderable.string("§6Times Denied: §c${denied.addSeparators()}"))
         }
     }
 
     @SubscribeEvent
     fun onBackgroundDraw(event: GuiRenderEvent.ChestGuiOverlayRenderEvent) {
-        if (inInventory) {
+        if (inInventory && config.showLogBookStats) {
             config.logBookStatsPos.renderRenderables(
                 display,
                 extraSpace = 5,
@@ -88,6 +93,11 @@ class LogBookStats {
         inInventory = false
     }
 
+    @SubscribeEvent
+    fun onInventoryClose(event: InventoryCloseEvent) {
+        inInventory = false
+    }
+
     private fun checkPages(event: InventoryFullyOpenedEvent) {
         val next = event.inventoryItems[53]
         if (next?.item != Items.arrow) {
@@ -96,13 +106,16 @@ class LogBookStats {
         }
         for (item in event.inventoryItems.values) {
             if (item.displayName != "§aNext Page") continue
-            for (line in item.getLore()) {
-                pagePattern.matchMatcher(line) {
-                    currentPage = group("page").toInt() - 1
-                }
+            item.getLore().matchFirst(pagePattern) {
+                currentPage = group("page").toInt() - 1
             }
         }
     }
 
-    data class VisitorInfo(var index: Int = -1, var displayName: String = "", var timesVisited: Long = 0, var timesAccepted: Long = 0)
+    data class VisitorInfo(
+        var index: Int = -1,
+        var displayName: String = "",
+        var timesVisited: Long = 0,
+        var timesAccepted: Long = 0,
+    )
 }

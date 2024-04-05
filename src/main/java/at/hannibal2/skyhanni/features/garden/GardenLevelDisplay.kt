@@ -101,7 +101,7 @@ class GardenLevelDisplay {
             "SkyBlock Menu" -> event.inventoryItems[10] ?: return
             else -> return
         }
-        gardenItemNamePattern.matchMatcher(item.name.removeColor()) {} ?: return
+        if (!gardenItemNamePattern.matches(item.name.removeColor())) return
         var nextLevelExp = 0L
         var currentLevel = 0
         for (line in item.getLore()) {
