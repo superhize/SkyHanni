@@ -205,6 +205,7 @@ import at.hannibal2.skyhanni.features.garden.fortuneguide.CaptureFarmingGear
 import at.hannibal2.skyhanni.features.garden.inventory.AnitaExtraFarmingFortune
 import at.hannibal2.skyhanni.features.garden.inventory.GardenCropMilestoneInventory
 import at.hannibal2.skyhanni.features.garden.inventory.GardenInventoryNumbers
+import at.hannibal2.skyhanni.features.garden.inventory.GardenInventoryTooltipOverflow
 import at.hannibal2.skyhanni.features.garden.inventory.LogBookStats
 import at.hannibal2.skyhanni.features.garden.inventory.SkyMartCopperPrice
 import at.hannibal2.skyhanni.features.garden.inventory.plots.GardenNextPlotPrice
@@ -816,6 +817,7 @@ class SkyHanniMod {
         loadModule(HighlightInquisitors())
         loadModule(VerminTracker)
         loadModule(SkillProgress)
+        loadModule(GardenInventoryTooltipOverflow())
         loadModule(SkillTooltip())
         loadModule(QuiverNotification)
         loadModule(MaxPurseItems())
