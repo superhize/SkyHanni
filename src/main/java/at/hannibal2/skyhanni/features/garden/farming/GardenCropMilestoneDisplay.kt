@@ -177,7 +177,7 @@ object GardenCropMilestoneDisplay {
         }
 
         lineMap[2] = if (crop.isMaxed() && !config.overflow.display) {
-            val haveFormat = LorenzUtils.formatInteger(counter)
+            val haveFormat = counter.addSeparators()
             Collections.singletonList("§7Counter: §e$haveFormat")
         } else {
             val haveFormat = have.addSeparators()
@@ -210,7 +210,7 @@ object GardenCropMilestoneDisplay {
                 }
             }
 
-            val format = LorenzUtils.formatInteger(farmingFortuneSpeed * 60)
+            val format = (farmingFortuneSpeed * 60).addSeparators()
             lineMap[4] = Collections.singletonList("§7Crops/Minute§8: §e$format")
             val formatBps = LorenzUtils.formatDouble(speed, config.blocksBrokenPrecision)
             lineMap[5] = Collections.singletonList("§7Blocks/Second§8: §e$formatBps")
