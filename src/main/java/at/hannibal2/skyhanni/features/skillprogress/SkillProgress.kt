@@ -459,8 +459,7 @@ object SkillProgress {
         }
 
         if (config.useIcon.get()) {
-            val item = skill.item ?: activeSkill.item
-            add(Renderable.itemStack(item, 1.2))
+            add(Renderable.itemStack(activeSkill.item, 1.0))
         }
 
         add(Renderable.string(buildString {
