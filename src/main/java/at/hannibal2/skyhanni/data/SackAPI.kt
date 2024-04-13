@@ -21,6 +21,7 @@ import at.hannibal2.skyhanni.utils.NEUItems.getNpcPriceOrNull
 import at.hannibal2.skyhanni.utils.NEUItems.getPrice
 import at.hannibal2.skyhanni.utils.NumberUtil.formatInt
 import at.hannibal2.skyhanni.utils.NumberUtil.romanToDecimal
+import at.hannibal2.skyhanni.utils.StringUtils.matchAll
 import at.hannibal2.skyhanni.utils.StringUtils.matchFirst
 import at.hannibal2.skyhanni.utils.StringUtils.matchMatcher
 import at.hannibal2.skyhanni.utils.StringUtils.matches
@@ -57,6 +58,15 @@ object SackAPI {
     var isTrophySack = false
     private var sackRarity: TrophyRarity? = null
 
+    /**
+     * TODO merge all 3 lists into one:
+     *
+     * move item name (currently key) into AbstractSackItem
+     * work with instance check
+     * add custom function for render behaviour.
+     * have only one render display function
+     */
+    //
     val sackItem = mutableMapOf<String, SackOtherItem>()
     val runeItem = mutableMapOf<String, SackRune>()
     val gemstoneItem = mutableMapOf<String, SackGemstone>()
@@ -110,13 +120,13 @@ object SackAPI {
 
     fun getSacksData(savingSacks: Boolean) {
         if (savingSacks) sackData = ProfileStorageData.sackProfiles?.sackContents ?: return
-        for ((_, stack) in stackList) {
+        for ((slot, stack) in stackList) {
             val name = stack.name
             val lore = stack.getLore()
 
             if (isGemstoneSack) {
-                lore.matchFirst(gemstonePattern) {
-                    val gem = SackGemstone()
+                val gem = SackGemstone()
+                lore.matchAll(gemstonePattern) {
                     val rarity = group("gemrarity")
                     val stored = group("stored").formatInt()
                     gem.internalName = gemstoneMap[name.removeColor()] ?: NEUInternalName.NONE
@@ -125,26 +135,34 @@ object SackAPI {
                             name.uppercase().split(" ")[0].removeColor()
                         }_GEM".asInternalName()
 
+                        gem.slot = slot
+
                         when (rarity) {
                             "Rough" -> {
                                 gem.rough = stored
+                                gem.stored += stored
                                 gem.roughPrice = internalName.sackPrice(stored)
+                                gem.price += gem.roughPrice
                                 if (savingSacks) setSackItem(internalName, stored)
                             }
 
                             "Flawed" -> {
                                 gem.flawed = stored
+                                gem.stored += stored
                                 gem.flawedPrice = internalName.sackPrice(stored)
+                                gem.price += gem.flawedPrice
                                 if (savingSacks) setSackItem(internalName, stored)
                             }
 
                             "Fine" -> {
                                 gem.fine = stored
+                                gem.stored += stored
                                 gem.finePrice = internalName.sackPrice(stored)
+                                gem.price += gem.finePrice
                                 if (savingSacks) setSackItem(internalName, stored)
+                                gemstoneItem[name] = gem
                             }
                         }
-                        gemstoneItem[name] = gem
                     }
                 }
             } else if (isRuneSack) {
@@ -154,11 +172,13 @@ object SackAPI {
                         val level = group("level").romanToDecimal()
                         val stored = group("stored").formatInt()
                         rune.stack = stack
+                        rune.stored += stored
 
                         when (level) {
                             1 -> rune.lvl1 = stored
                             2 -> rune.lvl2 = stored
                             3 -> {
+                                rune.slot = slot
                                 rune.lvl3 = stored
                                 runeItem[name] = rune
                             }
@@ -166,6 +186,7 @@ object SackAPI {
                     }
                 }
             } else {
+                // normal sack
                 lore.matchFirst(numPattern) {
                     val item = SackOtherItem()
                     val stored = group("stored").formatInt()
@@ -184,6 +205,7 @@ object SackAPI {
                     } else {
                         internalName.sackPrice(stored).coerceAtLeast(0)
                     }
+                    item.slot = slot
                     sackItem[name] = item
                 }
             }
@@ -306,22 +328,26 @@ object SackAPI {
         var roughPrice: Long = 0,
         var flawedPrice: Long = 0,
         var finePrice: Long = 0,
-    )
+    ): AbstractSackItem()
 
     data class SackRune(
         var stack: ItemStack? = null,
         var lvl1: Int = 0,
         var lvl2: Int = 0,
         var lvl3: Int = 0,
-    )
+    ): AbstractSackItem()
 
     data class SackOtherItem(
         var internalName: NEUInternalName = NEUInternalName.NONE,
         var colorCode: String = "",
-        var stored: Int = 0,
         var total: Int = 0,
-        var price: Long = 0,
         var magmaFish: Int = 0,
+    ): AbstractSackItem()
+
+    abstract class AbstractSackItem(
+        var stored: Int = 0,
+        var price: Long = 0,
+        var slot: Int = -1,
     )
 
     fun NEUInternalName.getAmountInSacksOrNull(): Int? =
