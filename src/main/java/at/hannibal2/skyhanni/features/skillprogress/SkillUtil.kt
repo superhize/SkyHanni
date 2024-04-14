@@ -126,13 +126,8 @@ object SkillUtil {
         return level
     }
 
-    fun calculateLevelXp(levelingArray: JsonArray, level: Int): Double {
-        var totalXp = 0.0
-        for (i in 0 until level + 1) {
-            val xp = levelingArray[i].asDouble
-            totalXp += xp
-        }
-        return totalXp
+    fun calculateLevelXp(level: Int): Double {
+        return SkillAPI.levelArray.asSequence().take(level + 1).sumOf { it.toDouble() }
     }
 
     fun levelArray(): JsonArray =
