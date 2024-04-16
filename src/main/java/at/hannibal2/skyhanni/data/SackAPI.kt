@@ -149,7 +149,7 @@ object SackAPI {
                         when (rarity) {
                             "Rough" -> {
                                 gem.rough = stored
-                                gem.stored += stored
+                                gem.stored += (stored * 1)
                                 gem.roughPrice = internalName.sackPrice(stored)
                                 gem.price += gem.roughPrice
                                 if (savingSacks) setSackItem(internalName, stored)
@@ -157,7 +157,7 @@ object SackAPI {
 
                             "Flawed" -> {
                                 gem.flawed = stored
-                                gem.stored += stored
+                                gem.stored += (stored * 80)
                                 gem.flawedPrice = internalName.sackPrice(stored)
                                 gem.price += gem.flawedPrice
                                 if (savingSacks) setSackItem(internalName, stored)
@@ -165,7 +165,7 @@ object SackAPI {
 
                             "Fine" -> {
                                 gem.fine = stored
-                                gem.stored += stored
+                                gem.stored += (stored * 80 * 80)
                                 gem.finePrice = internalName.sackPrice(stored)
                                 gem.price += gem.finePrice
                                 if (savingSacks) setSackItem(internalName, stored)
@@ -390,6 +390,7 @@ data class SackItem(
     fun statusIsCorrectOrAlright() = getStatus().let { it == SackStatus.CORRECT || it == SackStatus.ALRIGHT }
 }
 
+// TODO repo
 private val gemstoneMap = mapOf(
     "Jade Gemstones" to "ROUGH_JADE_GEM".asInternalName(),
     "Amber Gemstones" to "ROUGH_AMBER_GEM".asInternalName(),
@@ -402,7 +403,7 @@ private val gemstoneMap = mapOf(
     "Onyx Gemstones" to "ROUGH_ONYX_GEM".asInternalName(),
     "Aquamarine Gemstones" to "ROUGH_AQUAMARINE_GEM".asInternalName(),
     "Citrine Gemstones" to "ROUGH_CITRINE_GEM".asInternalName(),
-    "Peridot Gemstones" to "ROUG_PERIDOT_GEM".asInternalName()
+    "Peridot Gemstones" to "ROUGH_PERIDOT_GEM".asInternalName(),
 )
 
 // ideally should be correct but using alright should also be fine unless they sold their whole sacks
