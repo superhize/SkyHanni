@@ -75,6 +75,16 @@ object HoppityEggsManager {
             }
             meal.markClaimed()
         }
+
+        eggSpawnedPattern.matchMatcher(event.message) {
+            val meal = HoppityEggType.getMealByName(group("meal")) ?: run {
+                ErrorManager.skyHanniError(
+                    "Unknown meal: ${group("meal")}",
+                    "message" to event.message
+                )
+            }
+            meal.markSpawned()
+        }
     }
 
     fun shareWaypointPrompt() {
@@ -83,7 +93,7 @@ object HoppityEggsManager {
         val meal = lastMeal ?: return
         lastMeal = null
 
-        DelayedRun.runDelayed(1.seconds) {
+        DelayedRun.runNextTick {
             ChatUtils.clickableChat(
                 "Click here to share the location of this chocolate egg with the server!",
                 onClick = { HoppityEggsShared.shareNearbyEggLocation(currentLocation, meal) },

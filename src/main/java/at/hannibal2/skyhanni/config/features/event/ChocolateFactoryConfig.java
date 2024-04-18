@@ -1,4 +1,4 @@
-package at.hannibal2.skyhanni.config.features.misc;
+package at.hannibal2.skyhanni.config.features.event;
 
 import at.hannibal2.skyhanni.config.FeatureToggle;
 import at.hannibal2.skyhanni.config.core.config.Position;
@@ -23,7 +23,7 @@ public class ChocolateFactoryConfig {
     public HoppityEggsConfig hoppityEggs = new HoppityEggsConfig();
 
     @Expose
-    @ConfigOption(name = "Chocolate Factory Features", desc = "Global toggle for all Hoppity features.")
+    @ConfigOption(name = "Chocolate Factory Features", desc = "Global toggle for all chocolate factory features.")
     @ConfigEditorBoolean
     @FeatureToggle
     public boolean enabled = true;
@@ -52,7 +52,8 @@ public class ChocolateFactoryConfig {
         ChocolateFactoryStatsType.PER_DAY,
         ChocolateFactoryStatsType.EMPTY_2,
         ChocolateFactoryStatsType.MULTIPLIER,
-        ChocolateFactoryStatsType.BARN
+        ChocolateFactoryStatsType.BARN,
+        ChocolateFactoryStatsType.LEADERBOARD_POS
     ));
 
     @Expose
