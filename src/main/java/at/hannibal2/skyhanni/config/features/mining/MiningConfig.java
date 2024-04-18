@@ -14,7 +14,7 @@ public class MiningConfig {
     public MiningEventConfig miningEvent = new MiningEventConfig();
 
     @Expose
-    @Category(name = "Hotm", desc = "Settings for Heart of the Mountain")
+    @Category(name = "HotM", desc = "Settings for Heart of the Mountain")
     public HotmConfig hotmConfig = new HotmConfig();
 
     @Expose
