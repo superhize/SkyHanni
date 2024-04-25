@@ -10,6 +10,7 @@ import at.hannibal2.skyhanni.events.LorenzToolTipEvent
 import at.hannibal2.skyhanni.events.ProfileJoinEvent
 import at.hannibal2.skyhanni.utils.ChatUtils
 import at.hannibal2.skyhanni.utils.ConditionalUtils
+import at.hannibal2.skyhanni.utils.HypixelCommands
 import at.hannibal2.skyhanni.utils.InventoryUtils
 import at.hannibal2.skyhanni.utils.ItemUtils.getLore
 import at.hannibal2.skyhanni.utils.ItemUtils.name
@@ -85,19 +86,21 @@ class GardenLevelDisplay {
         val gardenExp = GardenAPI.gardenExp ?: return
         val oldLevel = GardenAPI.getGardenLevel()
         GardenAPI.gardenExp = gardenExp + moreExp
-        if (!config.overflowMessages) return
-        val newLevel = GardenAPI.getGardenLevel()
-        if (newLevel == oldLevel + 1 && newLevel > 15) {
-            LorenzUtils.runDelayed(50.milliseconds) {
-                ChatUtils.clickableChat(
-                    " \n§b§lGARDEN LEVEL UP §8$oldLevel ➜ §b$newLevel\n" +
-                        " §8+§aRespect from Elite Farmers and SkyHanni members :)\n ",
-                    "/gardenlevels",
-                    false
-                )
-            }
-        }
         update()
+        if (!config.overflowChat) return
+        val newLevel = GardenAPI.getGardenLevel()
+        if (newLevel != oldLevel + 1 || newLevel <= 15) return
+        LorenzUtils.runDelayed(50.milliseconds) {
+            ChatUtils.clickableChat(
+                " \n§b§lGARDEN LEVEL UP §8$oldLevel ➜ §b$newLevel\n" +
+                    " §8+§aRespect from Elite Farmers and SkyHanni members :)\n ",
+                onClick = {
+                    HypixelCommands.gardenLevels()
+                },
+                prefix = false
+            )
+
+        }
     }
 
     @SubscribeEvent
@@ -138,11 +141,9 @@ class GardenLevelDisplay {
     fun onTooltip(event: LorenzToolTipEvent) {
         if (!GardenAPI.inGarden()) return
         if (!config.overflow.get()) return
-        val inventoryName = InventoryUtils.openInventoryName()
         val slotIndex = event.slot.slotIndex
-        if (!((inventoryName == "Desk" && slotIndex == 4) ||
-            (inventoryName == "SkyBlock Menu" && slotIndex == 10))) return
-
+        val name = InventoryUtils.openInventoryName()
+        if (!((name == "Desk" && slotIndex == 4) || (name == "SkyBlock Menu" && slotIndex == 10))) return
         val gardenExp = GardenAPI.gardenExp ?: return
         val currentLevel = GardenAPI.getGardenLevel()
         if (currentLevel < 15) return
@@ -154,16 +155,18 @@ class GardenLevelDisplay {
         val needForOnlyNextLvl = needForNextLevel - needForLevel
 
         val iterator = event.toolTip.listIterator()
-        if (slotIndex == 4 && currentLevel > 15) event.itemStack.name = "§aGarden Level ${currentLevel.toRomanIfNecessary()}"
+        if (slotIndex == 4 && currentLevel > 15) {
+            event.itemStack.name = "§aGarden Level ${currentLevel.toRomanIfNecessary()}"
+        }
         var next = false
         for (line in iterator) {
             if (gardenMaxLevelPattern.matches(line)) {
-                iterator.set("§7Progress to Level ${(currentLevel+1).toRomanIfNecessary()}")
+                iterator.set("§7Progress to Level ${(currentLevel + 1).toRomanIfNecessary()}")
                 next = true
                 continue
             }
             if (next && line.contains("                    ")) {
-                val progress = overflow/needForOnlyNextLvl
+                val progress = overflow / needForOnlyNextLvl
                 val progressBar = StringUtils.progressBar(progress, 20)
                 iterator.set("$progressBar §e${overflow.addSeparators()}§6/§e${format(needForOnlyNextLvl)}")
                 iterator.add("")
@@ -180,7 +183,7 @@ class GardenLevelDisplay {
 
     private fun drawDisplay(): String {
         val gardenExp = GardenAPI.gardenExp ?: return "§aGarden Level ? §cOpen the desk!"
-        val currentLevel = GardenAPI.getGardenLevel(config.overflow.get())
+        val currentLevel = GardenAPI.getGardenLevel(overflow = config.overflow.get())
         val isMax = !config.overflow.get() && currentLevel == 15
         val needForLevel = GardenAPI.getExpForLevel(currentLevel).toInt()
         val overflow = gardenExp - needForLevel

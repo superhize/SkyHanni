@@ -14,25 +14,26 @@ import at.hannibal2.skyhanni.utils.RenderUtils.renderStrings
 import at.hannibal2.skyhanni.utils.SimpleTimeMark.Companion.fromNow
 import at.hannibal2.skyhanni.utils.StringUtils.matchMatcher
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import java.util.regex.Matcher
 import kotlin.time.Duration.Companion.seconds
 
 object HoppityEggsManager {
 
-    private val config get() = ChocolateFactoryApi.config.hoppityEggs
+    private val config get() = ChocolateFactoryAPI.config.hoppityEggs
 
-    private val eggFoundPattern by ChocolateFactoryApi.patternGroup.pattern(
+    private val eggFoundPattern by ChocolateFactoryAPI.patternGroup.pattern(
         "egg.found",
         "§d§lHOPPITY'S HUNT §r§dYou found a §r§.Chocolate (?<meal>\\w+) Egg.*"
     )
-    private val noEggsLeftPattern by ChocolateFactoryApi.patternGroup.pattern(
+    private val noEggsLeftPattern by ChocolateFactoryAPI.patternGroup.pattern(
         "egg.noneleft",
         "§cThere are no hidden Chocolate Rabbit Eggs nearby! Try again later!"
     )
-    private val eggSpawnedPattern by ChocolateFactoryApi.patternGroup.pattern(
+    private val eggSpawnedPattern by ChocolateFactoryAPI.patternGroup.pattern(
         "egg.spawned",
         "§d§lHOPPITY'S HUNT §r§dA §r§.Chocolate (?<meal>\\w+) Egg §r§dhas appeared!"
     )
-    private val eggAlreadyCollectedPattern by ChocolateFactoryApi.patternGroup.pattern(
+    private val eggAlreadyCollectedPattern by ChocolateFactoryAPI.patternGroup.pattern(
         "egg.alreadycollected",
         "§cYou have already collected this Chocolate (?<meal>\\w+) Egg§r§c! Try again when it respawns!"
     )
@@ -49,14 +50,8 @@ object HoppityEggsManager {
         if (!LorenzUtils.inSkyBlock) return
 
         eggFoundPattern.matchMatcher(event.message) {
-            HoppityEggsLocations.eggFound()
-
-            val meal = HoppityEggType.getMealByName(group("meal")) ?: run {
-                ErrorManager.skyHanniError(
-                    "Unknown meal: ${group("meal")}",
-                    "message" to event.message
-                )
-            }
+            HoppityEggLocator.eggFound()
+            val meal = getEggType(event)
             meal.markClaimed()
             lastMeal = meal
         }
@@ -67,37 +62,33 @@ object HoppityEggsManager {
         }
 
         eggAlreadyCollectedPattern.matchMatcher(event.message) {
-            val meal = HoppityEggType.getMealByName(group("meal")) ?: run {
-                ErrorManager.skyHanniError(
-                    "Unknown meal: ${group("meal")}",
-                    "message" to event.message
-                )
-            }
-            meal.markClaimed()
+            getEggType(event).markClaimed()
         }
 
         eggSpawnedPattern.matchMatcher(event.message) {
-            val meal = HoppityEggType.getMealByName(group("meal")) ?: run {
-                ErrorManager.skyHanniError(
-                    "Unknown meal: ${group("meal")}",
-                    "message" to event.message
-                )
-            }
-            meal.markSpawned()
+            getEggType(event).markSpawned()
         }
     }
 
+    internal fun Matcher.getEggType(event: LorenzChatEvent): HoppityEggType =
+        HoppityEggType.getMealByName(group("meal")) ?: run {
+            ErrorManager.skyHanniError(
+                "Unknown meal: ${group("meal")}",
+                "message" to event.message
+            )
+        }
+
     fun shareWaypointPrompt() {
         if (!config.sharedWaypoints) return
-        val currentLocation = LocationUtils.playerLocation()
         val meal = lastMeal ?: return
         lastMeal = null
 
+        val currentLocation = LocationUtils.playerLocation()
         DelayedRun.runNextTick {
             ChatUtils.clickableChat(
                 "Click here to share the location of this chocolate egg with the server!",
                 onClick = { HoppityEggsShared.shareNearbyEggLocation(currentLocation, meal) },
-                30.seconds.fromNow()
+                expireAt = 30.seconds.fromNow()
             )
         }
     }
@@ -107,16 +98,14 @@ object HoppityEggsManager {
         if (!LorenzUtils.inSkyBlock) return
         if (!config.showClaimedEggs) return
         if (ReminderUtils.isBusy()) return
-        if (!ChocolateFactoryApi.isHoppityEvent()) return
+        if (!ChocolateFactoryAPI.isHoppityEvent()) return
+        if (!HoppityEggLocator.hasLocatorInInventory()) return
 
-        val displayList = mutableListOf<String>()
-        displayList.add("§bUnfound Eggs:")
-
-        for (meal in HoppityEggType.entries) {
-            if (!meal.isClaimed()) {
-                displayList.add("§7 - ${meal.formattedName()}")
-            }
-        }
+        val displayList = HoppityEggType.entries
+            .filter { !it.isClaimed() }
+            .map { "§7 - ${it.formattedName}" }
+            .toMutableList()
+        displayList.add(0, "§bUnfound Eggs:")
         if (displayList.size == 1) return
 
         config.position.renderStrings(displayList, posLabel = "Hoppity Eggs")

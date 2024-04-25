@@ -17,12 +17,13 @@ enum class HoppityEggType(
     fun markClaimed() {
         claimed = true
     }
+
     fun markSpawned() {
         claimed = false
     }
 
     fun isClaimed() = claimed
-    fun formattedName() = "$mealColour$mealName"
+    val formattedName by lazy { "$mealColour$mealName" }
 
     companion object {
         fun allFound() = entries.forEach { it.markClaimed() }

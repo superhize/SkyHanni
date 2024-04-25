@@ -7,59 +7,56 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 object ChocolateFactoryStats {
 
-    private val config get() = ChocolateFactoryApi.config
+    private val config get() = ChocolateFactoryAPI.config
 
     private var displayList = listOf<String>()
 
     @SubscribeEvent
     fun onBackgroundDraw(event: GuiRenderEvent.ChestGuiOverlayRenderEvent) {
-        if (!ChocolateFactoryApi.inChocolateFactory) return
+        if (!ChocolateFactoryAPI.inChocolateFactory) return
         if (!config.statsDisplay) return
 
         config.position.renderStrings(displayList, posLabel = "Chocolate Factory Stats")
     }
 
     fun updateDisplay() {
-        val newList = mutableListOf<String>()
-        val perSecond = ChocolateFactoryApi.chocolatePerSecond
+        val perSecond = ChocolateFactoryAPI.chocolatePerSecond
         val perMinute = perSecond * 60
         val perHour = perMinute * 60
         val perDay = perHour * 24
-        val position = ChocolateFactoryApi.leaderboardPosition?.addSeparators() ?: "???"
+        val position = ChocolateFactoryAPI.leaderboardPosition?.addSeparators() ?: "???"
+        val percentile = ChocolateFactoryAPI.leaderboardPercentile?.let { "§7Top §a$it%" } ?: ""
 
-        newList.add("§6§lChocolate Factory Stats")
+        displayList = formatList(buildList {
+            add("§6§lChocolate Factory Stats")
 
-        newList.add("§eCurrent Chocolate: §6${ChocolateFactoryApi.chocolateCurrent.addSeparators()}")
-        newList.add("§eThis Prestige: §6${ChocolateFactoryApi.chocolateThisPrestige.addSeparators()}")
-        newList.add("§eAll-time: §6${ChocolateFactoryApi.chocolateAllTime.addSeparators()}")
+            add("§eCurrent Chocolate: §6${ChocolateFactoryAPI.chocolateCurrent.addSeparators()}")
+            add("§eThis Prestige: §6${ChocolateFactoryAPI.chocolateThisPrestige.addSeparators()}")
+            add("§eAll-time: §6${ChocolateFactoryAPI.chocolateAllTime.addSeparators()}")
 
-        newList.add("§ePer Second: §6${perSecond.addSeparators()}")
-        newList.add("§ePer Minute: §6${perMinute.addSeparators()}")
-        newList.add("§ePer Hour: §6${perHour.addSeparators()}")
-        newList.add("§ePer Day: §6${perDay.addSeparators()}")
+            add("§ePer Second: §6${perSecond.addSeparators()}")
+            add("§ePer Minute: §6${perMinute.addSeparators()}")
+            add("§ePer Hour: §6${perHour.addSeparators()}")
+            add("§ePer Day: §6${perDay.addSeparators()}")
 
-        newList.add("§eChocolate Multiplier: §6${ChocolateFactoryApi.chocolateMultiplier}")
-        newList.add("§eBarn: §6${ChocolateFactoryBarnManager.barnStatus()}")
+            add("§eChocolate Multiplier: §6${ChocolateFactoryAPI.chocolateMultiplier}")
+            add("§eBarn: §6${ChocolateFactoryBarnManager.barnStatus()}")
 
-        newList.add("§ePosition: §7#§b$position")
+            add("§ePosition: §7#§b$position $percentile")
 
-        newList.add("")
-        newList.add("")
-        newList.add("")
-
-        displayList = formatList(newList)
+            add("")
+            add("")
+            add("")
+        })
     }
 
-    private fun formatList(list: MutableList<String>): List<String> {
-        val newList = mutableListOf<String>()
-        for (index in config.statsDisplayList) {
-            newList.add(list[index.ordinal])
-        }
-
-        return newList
+    private fun formatList(list: List<String>): List<String> {
+        return config.statsDisplayList
+            .filter { ChocolateFactoryAPI.currentPrestige != 1 || it != ChocolateFactoryStat.THIS_PRESTIGE }
+            .map { list[it.ordinal] }
     }
 
-    enum class ChocolateFactoryStatsType(val display: String) {
+    enum class ChocolateFactoryStat(private val display: String) {
         HEADER("§6§lChocolate Factory Stats"),
         CURRENT("§eCurrent Chocolate: §65,272,230"),
         THIS_PRESTIGE("§eThis Prestige: §6483,023,853"),
@@ -70,7 +67,7 @@ object ChocolateFactoryStats {
         PER_DAY("§ePer Day: §6326,654,208"),
         MULTIPLIER("§eChocolate Multiplier: §61.77"),
         BARN("§eBarn: §6171/190 Rabbits"),
-        LEADERBOARD_POS("§ePosition: §7#§b103"),
+        LEADERBOARD_POS("§ePosition: §7#§b103 §7Top §a0.87%"),
         EMPTY(""),
         EMPTY_2(""),
         EMPTY_3(""),
