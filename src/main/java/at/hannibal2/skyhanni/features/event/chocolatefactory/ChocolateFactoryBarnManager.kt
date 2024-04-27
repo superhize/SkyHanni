@@ -47,9 +47,10 @@ object ChocolateFactoryBarnManager {
         if (!ChocolateFactoryAPI.isEnabled()) return
         val profileStorage = profileStorage ?: return
 
+        if (profileStorage.maxRabbits >= ChocolateFactoryAPI.maxRabbits) return
+
         val remainingSpace = profileStorage.maxRabbits - profileStorage.currentRabbits
-        barnFull =
-            remainingSpace <= config.barnCapacityThreshold && profileStorage.maxRabbits < ChocolateFactoryAPI.maxRabbits
+        barnFull = remainingSpace <= config.barnCapacityThreshold
         if (!barnFull) return
 
         if (lastBarnFullWarning.passedSince() < 30.seconds) return
@@ -65,7 +66,7 @@ object ChocolateFactoryBarnManager {
         }
 
         ChatUtils.clickableChat(
-            "§cYour barn is almost full! §7(${barnStatus()}). §cUpgrade it so they don't get crushed",
+            "§cYour barn is almost full! §7(${barnStatus()}). §cUpgrade it so they don't get crushed!",
             onClick = {
                 HypixelCommands.chocolateFactory()
             }
