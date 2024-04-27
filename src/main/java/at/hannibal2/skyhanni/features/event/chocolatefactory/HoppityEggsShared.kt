@@ -27,7 +27,6 @@ object HoppityEggsShared {
         if (!isEnabled()) return
 
         sharedEggPattern.matchMatcher(event.message.removeColor()) {
-
             val (x, y, z) = listOf(group("x"), group("y"), group("z")).map { it.formatInt() }
             val eggLocation = LorenzVec(x, y, z)
 

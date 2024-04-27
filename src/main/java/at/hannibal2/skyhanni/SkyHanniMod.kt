@@ -636,7 +636,6 @@ class SkyHanniMod {
         loadModule(HoppityEggsManager)
         loadModule(HoppityEggsLocations)
         loadModule(HoppityEggsShared)
-        loadModule(ChocolateFactoryStats)
         loadModule(HoppityEggLocator)
         loadModule(HoppityCollectionStats())
         loadModule(SpawnTimers())
