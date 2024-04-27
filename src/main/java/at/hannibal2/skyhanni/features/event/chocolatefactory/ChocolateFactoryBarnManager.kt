@@ -2,10 +2,7 @@ package at.hannibal2.skyhanni.features.event.chocolatefactory
 
 import at.hannibal2.skyhanni.events.LorenzChatEvent
 import at.hannibal2.skyhanni.utils.ChatUtils
-<<<<<<< HEAD
-=======
 import at.hannibal2.skyhanni.utils.HypixelCommands
->>>>>>> 2beec798668cf99a9f7cb50a94b18f46b593a021
 import at.hannibal2.skyhanni.utils.LorenzUtils
 import at.hannibal2.skyhanni.utils.SimpleTimeMark
 import at.hannibal2.skyhanni.utils.SoundUtils
