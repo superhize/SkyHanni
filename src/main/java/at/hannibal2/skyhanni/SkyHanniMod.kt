@@ -102,6 +102,7 @@ import at.hannibal2.skyhanni.features.commands.WarpIsCommand
 import at.hannibal2.skyhanni.features.commands.WikiManager
 import at.hannibal2.skyhanni.features.commands.tabcomplete.GetFromSacksTabComplete
 import at.hannibal2.skyhanni.features.commands.tabcomplete.PlayerTabComplete
+import at.hannibal2.skyhanni.features.commands.tabcomplete.TabComplete
 import at.hannibal2.skyhanni.features.commands.tabcomplete.WarpTabComplete
 import at.hannibal2.skyhanni.features.cosmetics.ArrowTrail
 import at.hannibal2.skyhanni.features.cosmetics.CosmeticFollowingLine
@@ -128,6 +129,7 @@ import at.hannibal2.skyhanni.features.event.UniqueGiftingOpportunitiesFeatures
 import at.hannibal2.skyhanni.features.event.chocolatefactory.ChocolateFactoryAPI
 import at.hannibal2.skyhanni.features.event.chocolatefactory.ChocolateFactoryBarnManager
 import at.hannibal2.skyhanni.features.event.chocolatefactory.ChocolateFactoryInventory
+import at.hannibal2.skyhanni.features.event.chocolatefactory.ChocolateFactoryShortcut
 import at.hannibal2.skyhanni.features.event.chocolatefactory.ChocolateFactoryStats
 import at.hannibal2.skyhanni.features.event.chocolatefactory.ChocolateFactoryTimeTowerManager
 import at.hannibal2.skyhanni.features.event.chocolatefactory.HoppityCollectionStats
@@ -135,6 +137,7 @@ import at.hannibal2.skyhanni.features.event.chocolatefactory.HoppityEggLocator
 import at.hannibal2.skyhanni.features.event.chocolatefactory.HoppityEggsLocations
 import at.hannibal2.skyhanni.features.event.chocolatefactory.HoppityEggsManager
 import at.hannibal2.skyhanni.features.event.chocolatefactory.HoppityEggsShared
+import at.hannibal2.skyhanni.features.event.chocolatefactory.clicks.FactoryItemTooltipFeatures
 import at.hannibal2.skyhanni.features.event.diana.AllBurrowsList
 import at.hannibal2.skyhanni.features.event.diana.BurrowWarpHelper
 import at.hannibal2.skyhanni.features.event.diana.DianaProfitTracker
@@ -465,7 +468,7 @@ import org.apache.logging.log4j.Logger
     clientSideOnly = true,
     useMetadata = true,
     guiFactory = "at.hannibal2.skyhanni.config.ConfigGuiForgeInterop",
-    version = "0.25.Beta.14",
+    version = "0.25.Beta.15",
 )
 class SkyHanniMod {
 
@@ -539,6 +542,7 @@ class SkyHanniMod {
         loadModule(ChromaManager)
         loadModule(HotmData)
         loadModule(ContributorManager)
+        loadModule(TabComplete)
 
         // APIs
         loadModule(BazaarApi())
@@ -630,9 +634,11 @@ class SkyHanniMod {
         loadModule(AreaMiniBossFeatures())
         loadModule(MobHighlight())
         loadModule(ChocolateFactoryBarnManager)
+        loadModule(ChocolateFactoryShortcut())
         loadModule(ChocolateFactoryInventory)
         loadModule(ChocolateFactoryStats)
         loadModule(ChocolateFactoryTimeTowerManager)
+        loadModule(FactoryItemTooltipFeatures)
         loadModule(HoppityEggsManager)
         loadModule(HoppityEggsLocations)
         loadModule(HoppityEggsShared)
